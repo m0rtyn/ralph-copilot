@@ -8,6 +8,7 @@ import {
 } from './types';
 import { logError } from './logger';
 import { readPRDAsync, getNextTaskAsync, getTaskStatsAsync, getWorkspaceRoot, appendProgressAsync, ensureProgressFileAsync } from './fileUtils';
+import { getConfig } from './config';
 import { RalphStatusBar } from './statusBar';
 import { CountdownTimer, InactivityMonitor } from './timerManager';
 import { FileWatcherManager } from './fileWatchers';
@@ -66,12 +67,13 @@ export class LoopOrchestrator {
 
         const stats = await getTaskStatsAsync();
         if (stats.pending === 0) {
-            this.ui.addLog('No pending tasks found. Add tasks to PRD.md first.');
-            vscode.window.showInformationMessage('Ralph: No pending tasks found in PRD.md');
+            const config = getConfig();
+            this.ui.addLog(`No pending tasks found. Add tasks to ${config.files.prdPath} first.`);
+            vscode.window.showInformationMessage(`Ralph: No pending tasks found in ${config.files.prdPath}`);
             return;
         }
 
-        // Ensure progress.txt exists
+        // Ensure progress file exists
         await ensureProgressFileAsync();
 
         this.taskRunner.clearHistory();
@@ -139,8 +141,9 @@ export class LoopOrchestrator {
 
         const task = await getNextTaskAsync();
         if (!task) {
+            const config = getConfig();
             this.ui.addLog('No pending tasks');
-            vscode.window.showInformationMessage('Ralph: No pending tasks in PRD.md');
+            vscode.window.showInformationMessage(`Ralph: No pending tasks in ${config.files.prdPath}`);
             return;
         }
 
@@ -198,7 +201,8 @@ export class LoopOrchestrator {
         this.fileWatchers.prdWatcher.start(initialContent, (newContent) => {
             this.handlePrdChange(newContent);
         });
-        this.ui.addLog('👁️ Watching PRD.md for task completion...');
+        const config = getConfig();
+        this.ui.addLog(`👁️ Watching ${config.files.prdPath} for task completion...`);
 
         this.fileWatchers.activityWatcher.start(() => {
             this.inactivityMonitor.recordActivity();
@@ -208,13 +212,14 @@ export class LoopOrchestrator {
     }
 
     private setupPrdCreationWatcher(): void {
+        const config = getConfig();
         this.fileWatchers.prdCreationWatcher.start(async () => {
-            this.ui.addLog('PRD.md created successfully!', true);
+            this.ui.addLog(`${config.files.prdPath} created successfully!`, true);
             await this.ui.refresh();
             this.fileWatchers.prdCreationWatcher.dispose();
-            vscode.window.showInformationMessage('Ralph: PRD.md created! Click Start to begin.');
+            vscode.window.showInformationMessage(`Ralph: ${config.files.prdPath} created! Click Start to begin.`);
         });
-        this.ui.addLog('👁️ Watching for PRD.md creation...');
+        this.ui.addLog(`👁️ Watching for ${config.files.prdPath} creation...`);
     }
 
     private async runNextTask(): Promise<void> {
@@ -227,7 +232,8 @@ export class LoopOrchestrator {
         if (stats.pending === 0) {
             this.ui.addLog('🎉 All tasks completed!', true);
             this.stopLoop();
-            vscode.window.showInformationMessage('Ralph: All PRD tasks completed! 🎉');
+            const config = getConfig();
+            vscode.window.showInformationMessage(`Ralph: All ${config.files.prdPath} tasks completed! 🎉`);
             return;
         }
 
@@ -255,12 +261,14 @@ export class LoopOrchestrator {
         this.fileWatchers.prdWatcher.enable();
         this.inactivityMonitor.setWaiting(true);
         this.ui.updateStatus('waiting', iteration, task.description);
-        this.ui.addLog('Waiting for Copilot to complete and update PRD.md...');
+        const configForWait = getConfig();
+        this.ui.addLog(`Waiting for Copilot to complete and update ${configForWait.files.prdPath}...`);
     }
 
     private async handlePrdChange(newContent: string): Promise<void> {
         try {
-            this.ui.addLog('📝 PRD.md changed - checking task status...');
+            const config = getConfig();
+            this.ui.addLog(`📝 ${config.files.prdPath} changed - checking task status...`);
             this.inactivityMonitor.recordActivity();
             this.fileWatchers.prdWatcher.updateContent(newContent);
 

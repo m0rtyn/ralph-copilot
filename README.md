@@ -63,6 +63,50 @@ Then open the Control Panel and click **Start**.
 5. Copilot marks task complete
 6. Repeat until all tasks done
 
+## Configuration
+
+### Custom File Paths
+
+By default, Ralph looks for `PRD.md` and `progress.txt` in your workspace root. You can configure custom paths to organize these files differently:
+
+**Settings:**
+
+| Setting                    | Default        | Description                        |
+| -------------------------- | -------------- | ---------------------------------- |
+| `ralph.files.prdPath`      | `PRD.md`       | Path to your PRD file              |
+| `ralph.files.progressPath` | `progress.txt` | Path to the progress tracking file |
+
+**Example: Store Ralph files in a `.ralph` folder**
+
+Add to your `.vscode/settings.json`:
+
+```json
+{
+  "ralph.files.prdPath": ".ralph/PRD.md",
+  "ralph.files.progressPath": ".ralph/progress.txt"
+}
+```
+
+**Example: Use a `docs` folder**
+
+```json
+{
+  "ralph.files.prdPath": "docs/requirements.md",
+  "ralph.files.progressPath": "docs/progress.log"
+}
+```
+
+> **Note:** Ralph automatically creates parent directories if they don't exist. For example, if you set the path to `.ralph/PRD.md`, Ralph will create the `.ralph` folder when generating a new PRD.
+
+### Custom Prompt Templates
+
+You can customize the prompts Ralph sends to Copilot:
+
+| Setting                                    | Description                                                                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `ralph.prompt.customTemplate`              | Override the task execution prompt. Variables: `{{task}}`, `{{prd}}`, `{{progress}}`, `{{requirements}}`, `{{workspace}}` |
+| `ralph.prompt.customPrdGenerationTemplate` | Override the PRD generation prompt. Variables: `{{task}}`, `{{workspace}}`                                                |
+
 ## Requirements
 
 - VS Code 1.93 or later

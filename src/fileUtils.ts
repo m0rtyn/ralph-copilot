@@ -55,6 +55,10 @@ export async function appendProgressAsync(entry: string): Promise<boolean> {
 
     const progressPath = path.join(root, config.files.progressPath);
     try {
+        // Ensure parent directories exist
+        const parentDir = path.dirname(progressPath);
+        await fsPromises.mkdir(parentDir, { recursive: true });
+        
         const timestamp = new Date().toISOString();
         const formattedEntry = `[${timestamp}] ${entry}\n`;
         await fsPromises.appendFile(progressPath, formattedEntry, 'utf-8');
@@ -77,6 +81,9 @@ export async function ensureProgressFileAsync(): Promise<boolean> {
     } catch {
         // File doesn't exist, create it
         try {
+            // Ensure parent directories exist
+            const parentDir = path.dirname(progressPath);
+            await fsPromises.mkdir(parentDir, { recursive: true });
             await fsPromises.writeFile(progressPath, '# Progress Log\n\n', 'utf-8');
             return true;
         } catch (error) {

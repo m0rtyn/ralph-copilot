@@ -8,6 +8,7 @@ import {
 } from './types';
 import { logError } from './logger';
 import { getWorkspaceRoot } from './fileUtils';
+import { getConfig } from './config';
 import { buildAgentPromptAsync, buildPrdGenerationPrompt } from './promptBuilder';
 import { openCopilotWithPrompt, startFreshChatSession } from './copilotIntegration';
 import { formatDuration } from './timerManager';
@@ -133,7 +134,8 @@ export class TaskRunner {
             return null;
         }
 
-        this.log('✨ Generating PRD.md from your description...');
+        const config = getConfig();
+        this.log(`✨ Generating ${config.files.prdPath} from your description...`);
 
         try {
             const prompt = buildPrdGenerationPrompt(taskDescription, root);

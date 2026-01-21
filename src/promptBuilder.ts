@@ -61,6 +61,9 @@ export async function buildAgentPromptAsync(taskDescription: string, requirement
         });
     }
 
+    const prdPath = config.files.prdPath;
+    const progressPath = config.files.progressPath;
+
     const parts: string[] = [
         '===================================================================',
         '                       YOUR TASK TO IMPLEMENT',
@@ -69,17 +72,17 @@ export async function buildAgentPromptAsync(taskDescription: string, requirement
         sanitizedTask,
         '',
         '===================================================================',
-        '           MANDATORY: UPDATE PRD.md AND progress.txt WHEN DONE',
+        `           MANDATORY: UPDATE ${prdPath} AND ${progressPath} WHEN DONE`,
         '═══════════════════════════════════════════════════════════════',
         '',
         '🚨 THESE STEPS ARE REQUIRED - DO NOT SKIP THEM! 🚨',
         '',
-        '1. After completing the task, UPDATE PRD.md:',
+        `1. After completing the task, UPDATE ${prdPath}:`,
         '',
         `   Find this line:    - [ ] ${sanitizedTask}`,
         `   Change it to:      - [x] ${sanitizedTask}`,
         '',
-        '2. APPEND to progress.txt with what you did:',
+        `2. APPEND to ${progressPath} with what you did:`,
         '',
         '   Add a new line describing what was completed, e.g.:',
         `   "Completed: ${sanitizedTask} - [brief summary of changes made]"`,
@@ -90,7 +93,7 @@ export async function buildAgentPromptAsync(taskDescription: string, requirement
         '                      PROJECT CONTEXT',
         '═══════════════════════════════════════════════════════════════',
         '',
-        '## Current PRD.md Contents:',
+        `## Current ${prdPath} Contents:`,
         '```markdown',
         prd,
         '```',
@@ -98,15 +101,15 @@ export async function buildAgentPromptAsync(taskDescription: string, requirement
     ];
 
     if (progress && progress.trim()) {
-        parts.push('## Progress Log (progress.txt):');
+        parts.push(`## Progress Log (${progressPath}):`);
         parts.push('This file tracks completed work. Append your progress here when done.');
         parts.push('```');
         parts.push(progress);
         parts.push('```');
         parts.push('');
     } else {
-        parts.push('## Progress Log (progress.txt):');
-        parts.push('No progress recorded yet. Create or append to progress.txt when you complete this task.');
+        parts.push(`## Progress Log (${progressPath}):`);
+        parts.push(`No progress recorded yet. Create or append to ${progressPath} when you complete this task.`);
         parts.push('');
     }
 
@@ -120,7 +123,7 @@ export async function buildAgentPromptAsync(taskDescription: string, requirement
     parts.push('');
     parts.push(`Workspace: ${root}`);
     parts.push('');
-    parts.push('Begin now. Remember: updating both PRD.md and progress.txt when done is MANDATORY!');
+    parts.push(`Begin now. Remember: updating both ${prdPath} and ${progressPath} when done is MANDATORY!`);
 
     return parts.join('\n');
 }
@@ -153,9 +156,10 @@ function buildRequirementsSteps(taskDescription: string, requirements: TaskRequi
         reqSteps.push(`${stepNum}. ✅ Commit your changes with a descriptive message`);
         stepNum++;
     }
-    reqSteps.push(`${stepNum}. ✅ UPDATE PRD.md: Change "- [ ] ${taskDescription}" to "- [x] ${taskDescription}"`);
+    const config = getConfig();
+    reqSteps.push(`${stepNum}. ✅ UPDATE ${config.files.prdPath}: Change "- [ ] ${taskDescription}" to "- [x] ${taskDescription}"`);
     stepNum++;
-    reqSteps.push(`${stepNum}. ✅ APPEND to progress.txt: Record what you completed`);
+    reqSteps.push(`${stepNum}. ✅ APPEND to ${config.files.progressPath}: Record what you completed`);
 
     return reqSteps;
 }
