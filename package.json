@@ -92,15 +92,16 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "pnpm run compile",
+    "package": "vsce package",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
-    "pretest:unit": "npm run compile",
+    "pretest:unit": "pnpm run compile",
     "test:unit": "mocha --reporter spec out/test/unit/**/*.unit.test.js",
-    "pretest:coverage": "npm run compile",
-    "test:coverage": "nyc npm run test:unit"
+    "pretest:coverage": "pnpm run compile",
+    "test:coverage": "nyc pnpm run test:unit"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
